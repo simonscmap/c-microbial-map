@@ -5,7 +5,7 @@ From: r-base:3.5.2
     PATH=/app/c-microbial-map/scripts:$PATH
 
 %runscript
-    exec Rscript /app/c-microbial-map/scripts/blast2cmap.py
+    exec /app/c-microbial-map/scripts/blast2cmap.py
 
 %post
     apt-get update
@@ -21,15 +21,15 @@ From: r-base:3.5.2
     #
     # Install R modules (need the .Rprofile to indicate CRAN mirror)
     #
-#    cat << EOF > .Rprofile
-#local({
-#  r = getOption("repos")
-#  r["CRAN"] = "http://mirrors.nics.utk.edu/cran/"
-#  options(repos = r)
-#})
-#EOF
+    cat << EOF > .Rprofile
+local({
+  r = getOption("repos")
+  r["CRAN"] = "http://mirrors.nics.utk.edu/cran/"
+  options(repos = r)
+})
+EOF
 
-#    Rscript /app/c-microbial-map/scripts/install.r
+    Rscript /app/c-microbial-map/scripts/install.r
   
     # Mount points for TACC directories
     mkdir /home1

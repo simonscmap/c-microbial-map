@@ -3,4 +3,5 @@
 *.swp
 .snakemake
 .Rhistory
-sqlite/centroids.db
+centroids.db
+out
