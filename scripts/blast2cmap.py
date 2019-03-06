@@ -164,7 +164,7 @@ def cmap_query(blast_hits, centroids_db, out_dir):
     # if the CMAP tblESV column is changed
     flds = [
         'lat', 'lon', 'depth', 'relative_abundance', 'esv_tempreature',
-        'esv_salinity'
+        'esv_salinity', 'cruise_name'
     ]
     qry = 'select {} from tblesv where centroid=?'.format(', '.join(flds))
     cursor = sqlite3.connect(
@@ -174,7 +174,7 @@ def cmap_query(blast_hits, centroids_db, out_dir):
     out_fh = open(out_file, 'wt')
     out_fh.write(','.join([
         'latitude', 'longitude', 'depth', 'Relative_Abundance', 'temperature',
-        'salinity'
+        'salinity', 'cruise_name'
     ]) + '\n')
 
     seen = set()
@@ -197,7 +197,8 @@ def cmap_query(blast_hits, centroids_db, out_dir):
 
             if rows:
                 for row in rows:
-                    out_fh.write(','.join(map(str, row)) + '\n')
+                    out_fh.write(','.join(map(lambda x: str(x).strip(), row)) +
+                                 '\n')
             else:
                 warn('Found no match for centroid "{}"'.format(seq_id))
 
