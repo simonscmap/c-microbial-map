@@ -10,7 +10,7 @@ clean:
 
 img: clean
 	#sudo $(SINGULARITY) build $(IMG) $(DEF)
-	sudo $(SINGULARITY) create --size 1048 $(IMG)
+	sudo $(SINGULARITY) create --size 2048 $(IMG)
 	sudo $(SINGULARITY) bootstrap $(IMG) $(DEF)
 
 shell:

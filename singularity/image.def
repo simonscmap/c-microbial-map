@@ -9,14 +9,14 @@ From: r-base:3.5.2
 
 %post
     apt-get update
-    apt-get install git -y python3 python3-pip pyodbc blast+ 
-    python3 -m pip install opedia # snakemake
+    apt-get install git -y python3 python3-pip ncbi-blast+ unixodbc unixodbc-dev
+    python3 -m pip install pyodbc opedia # snakemake
 
     mkdir /app
     cd /app
     git clone https://github.com/simonscmap/c-microbial-map.git
 
-    /app/c-microbial-map/db/mk-blast-db.sh
+    /app/c-microbial-map/blast/mk-blast-db.sh
 
     #
     # Install R modules (need the .Rprofile to indicate CRAN mirror)

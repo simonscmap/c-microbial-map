@@ -201,8 +201,6 @@ def cmap_query(blast_hits, centroids_db, out_dir):
             else:
                 warn('Found no match for centroid "{}"'.format(seq_id))
 
-            break
-
     out_fh.close()
     return out_file
 
