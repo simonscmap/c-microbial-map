@@ -10,17 +10,11 @@
 module load tacc-singularity
 
 IMG=/work/05066/imicrobe/singularity/r-oce-0.0.1.img
+CENTROIDS=/work/05066/imicrobe/iplantc.org/data/scope/centroids/centroids
 
 set -u
 
-function HELP() {
-    printf "Usage:\\n  %s IN_DIR \\n\\n" "$(basename "$0")"
-    exit 0
-}
-
-[[ $# -ne 1 ]] && HELP
-
-singularity exec $IMG plot.r $1
+singularity exec $IMG blast2cmap.py "$@" -c "$CENTROIDS" -o cmap-out
 
 echo "Done."
 echo "Comments to Ken Youens-Clark <kyclark@email.arizona.edu>"

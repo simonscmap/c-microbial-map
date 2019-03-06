@@ -1,3 +1,6 @@
 *.img
 *.csv
+*.swp
+.snakemake
 .Rhistory
+sqlite/centroids.db

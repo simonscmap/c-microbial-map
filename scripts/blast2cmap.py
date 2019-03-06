@@ -10,6 +10,7 @@ import csv
 import os
 import sys
 import pandas as pd
+import sqlite3
 from opedia import db
 from subprocess import getstatusoutput
 
@@ -35,7 +36,15 @@ def get_args():
         help='BLAST db',
         metavar='str',
         type=str,
-        default='blast')
+        required=True)
+
+    parser.add_argument(
+        '-c',
+        '--centroids_db',
+        help='Centroids/SQLite db',
+        metavar='str',
+        type=str,
+        default=None)
 
     parser.add_argument(
         '-p',
@@ -54,7 +63,7 @@ def get_args():
         default=0.)
 
     parser.add_argument(
-        '-c',
+        '-Q',
         '--qcov_hsp_perc',
         help='BLAST percent query coverage per hsp',
         metavar='float',
@@ -91,11 +100,23 @@ def main():
     args = get_args()
     query = args.query
     blast_db = args.blast_db
+    centroids_db = args.centroids_db
     blast_prg = args.blast_program
     out_dir = args.outdir
 
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
+
+    blast_dir = os.path.dirname(os.path.abspath(blast_db))
+    if not os.path.isdir(blast_dir):
+        die('--blast_db dir "{}" is not a dir'.format(blast_dir))
+
+    blast_db_name = os.path.basename(blast_db)
+    if not [f for f in os.listdir(blast_dir) if f.startswith(blast_db_name)]:
+        die('No BLAST "{}" files in "{}"'.format(blast_db_name, blast_dir))
+
+    if centroids_db and not os.path.isfile(centroids_db):
+        die('--centroids "{}" is not a file'.format(centroids_db))
 
     print('Running BLAST')
     hits = run_blast(
@@ -106,8 +127,9 @@ def main():
         query=query,
         out_dir=out_dir)
 
-    print('CMAP query')
-    centroids_file = cmap_query(blast_hits=hits, out_dir=out_dir)
+    print('Centroids query')
+    centroids_file = cmap_query(
+        blast_hits=hits, centroids_db=centroids_db, out_dir=out_dir)
 
     print('Plotting')
     plot(centroids_file=centroids_file, out_dir=out_dir)
@@ -135,8 +157,18 @@ def plot(centroids_file, out_dir):
 
 
 # --------------------------------------------------
-def cmap_query(blast_hits, out_dir):
-    """Given BLAST hits, query CMAP for location"""
+def cmap_query(blast_hits, centroids_db, out_dir):
+    """Given BLAST hits, query CMAP/SQLite for location"""
+
+    # TODO: fix spelling of "esv_tempreature" => "esv_temperature"
+    # if the CMAP tblESV column is changed
+    flds = [
+        'lat', 'lon', 'depth', 'relative_abundance', 'esv_tempreature',
+        'esv_salinity'
+    ]
+    qry = 'select {} from tblesv where centroid=?'.format(', '.join(flds))
+    cursor = sqlite3.connect(
+        centroids_db).cursor() if centroids_db else db.dbConnect().cursor()
 
     out_file = os.path.join(out_dir, 'oce-input.csv')
     out_fh = open(out_file, 'wt')
@@ -147,13 +179,11 @@ def cmap_query(blast_hits, out_dir):
 
     seen = set()
     with open(blast_hits) as csvfile:
-        flds = [
+        blast_flds = [
             'qseqid', 'sseqid', 'pident', 'length', 'mismatch', 'gapopen',
             'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore'
         ]
-        reader = csv.DictReader(csvfile, fieldnames=flds, delimiter='\t')
-
-        query = "SELECT * FROM tblesv WHERE centroid='{}'"
+        reader = csv.DictReader(csvfile, fieldnames=blast_flds, delimiter='\t')
 
         for hit_num, row in enumerate(reader):
             seq_id = row['sseqid']
@@ -163,14 +193,15 @@ def cmap_query(blast_hits, out_dir):
                 continue
             seen.add(seq_id)
 
-            df = db.dbFetch(query.format(seq_id))
-            for i, row in df.iterrows():
-                out_fh.write(','.join(
-                    map(str, [
-                        row['lat'], row['lon'], row['depth'],
-                        row['relative_abundance'], row['relative_abundance'],
-                        row['esv_salinity']
-                    ])) + '\n')
+            rows = cursor.execute(qry, (seq_id, )).fetchall()
+
+            if rows:
+                for row in rows:
+                    out_fh.write(','.join(map(str, row)) + '\n')
+            else:
+                warn('Found no match for centroid "{}"'.format(seq_id))
+
+            break
 
     out_fh.close()
     return out_file

@@ -2,31 +2,34 @@ BootStrap: docker
 From: r-base:3.5.2
 
 %environment
-    PATH=/app/r-oce/scripts:$PATH
+    PATH=/app/c-microbial-map/scripts:$PATH
 
 %runscript
-    exec Rscript /app/r-oce/scripts/plot.r
+    exec Rscript /app/c-microbial-map/scripts/blast2cmap.py
 
 %post
     apt-get update
-    apt-get install git -y
+    apt-get install git -y python3 python3-pip pyodbc blast+ 
+    python3 -m pip install opedia # snakemake
 
     mkdir /app
     cd /app
-    git clone https://github.com/hurwitzlab/r-oce.git
+    git clone https://github.com/simonscmap/c-microbial-map.git
+
+    /app/c-microbial-map/db/mk-blast-db.sh
 
     #
     # Install R modules (need the .Rprofile to indicate CRAN mirror)
     #
-    cat << EOF > .Rprofile
-local({
-  r = getOption("repos")
-  r["CRAN"] = "http://mirrors.nics.utk.edu/cran/"
-  options(repos = r)
-})
-EOF
+#    cat << EOF > .Rprofile
+#local({
+#  r = getOption("repos")
+#  r["CRAN"] = "http://mirrors.nics.utk.edu/cran/"
+#  options(repos = r)
+#})
+#EOF
 
-    Rscript /app/r-oce/scripts/install.r
+#    Rscript /app/c-microbial-map/scripts/install.r
   
     # Mount points for TACC directories
     mkdir /home1
