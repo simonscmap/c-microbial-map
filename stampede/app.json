@@ -1,7 +1,7 @@
 {
-    "name": "r-oce",
+    "name": "c-microbial-map",
     "version": "0.0.1",
-    "shortDescription": "Run R OCE plotting program.",
+    "shortDescription": "Given a FASTA file of 16S sequences, BLAST and map geographic distribution of hits.",
     "longDescription": "",
     "available": true,
     "checkpointable": false,
@@ -10,12 +10,12 @@
     "defaultMaxRunTime": "12:00:00",
     "defaultNodeCount": 1,
     "defaultQueue": "normal",
-    "deploymentPath": "kyclark/applications/r-oce-0.0.1/stampede",
+    "deploymentPath": "kyclark/applications/c-microbial-map-0.0.1/stampede",
     "deploymentSystem": "data.iplantcollaborative.org",
     "executionSystem": "tacc-stampede2-kyclark",
     "executionType": "HPC",
-    "helpURI": "https://cran.r-project.org/web/packages/oce/vignettes/oce.html",
-    "label": "R OCE",
+    "helpURI": "https://dornsife.usc.edu/labs/fuhrmanlab",
+    "label": "C-Microbial-Map",
     "parallelism": "serial",
     "templatePath": "template.sh",
     "testPath": "test.sh",
@@ -23,7 +23,9 @@
         "load tacc-singularity"
     ],
     "tags": [
-        "imicrobe", "oce", "ocean"
+        "imicrobe",
+        "oce",
+        "ocean"
     ],
     "ontology": [
         "http://sswapmeet.sswap.info/agave/apps/Application"
@@ -58,6 +60,80 @@
             }
         }
     ],
-    "parameters": [],
+    "parameters": [
+        {
+            "id": "BLAST program",
+            "value": {
+                "default": "blastn",
+                "type": "enumeration",
+                "order": 1,
+                "required": true,
+                "visible": true,
+                "enquote": false,
+                "enumValues": [
+                    {
+                        "blastn": "blastn"
+                    },
+                    {
+                        "blastp": "blastp"
+                    },
+                    {
+                        "blastx": "blastx"
+                    },
+                    {
+                        "tblastn": "tblastn"
+                    },
+                    {
+                        "tblastx": "tblastx"
+                    }
+                ]
+            },
+            "details": {
+                "description": "",
+                "label": "BLAST_PROGRAM",
+                "argument": "",
+                "repeatArgument": false,
+                "showArgument": true
+            }
+        },
+        {
+            "id": "Percent Identity",
+            "value": {
+                "default": "0.0",
+                "type": "string",
+                "order": 2,
+                "required": true,
+                "visible": true,
+                "enquote": false,
+                "validator": ""
+            },
+            "details": {
+                "description": "",
+                "label": "PERCENT_IDENTITY",
+                "argument": "",
+                "repeatArgument": false,
+                "showArgument": true
+            }
+        },
+        {
+            "id": "Percent query coverage per hsp",
+            "value": {
+                "default": "0.0",
+                "type": "string",
+                "order": 3,
+                "required": true,
+                "visible": true,
+                "enquote": false,
+                "validator": ""
+            },
+            "details": {
+                "description": "",
+                "label": "QCOV_HSP_PERC",
+                "argument": "",
+                "repeatArgument": false,
+                "showArgument": true
+            }
+        }
+    ],
     "outputs": []
 }
