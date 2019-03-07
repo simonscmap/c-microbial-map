@@ -1,4 +1,4 @@
-APP = r-oce-0.0.1
+APP = c-microbial-map-0.0.1
 EMAIL = kyclark@email.arizona.edu
 
 clean:
