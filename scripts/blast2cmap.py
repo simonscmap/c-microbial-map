@@ -28,6 +28,7 @@ def get_args():
         help='Query file for BLAST',
         metavar='str',
         type=str,
+        nargs='+',
         required=True)
 
     parser.add_argument(
