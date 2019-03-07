@@ -62,7 +62,7 @@
     ],
     "parameters": [
         {
-            "id": "BLAST program",
+            "id": "BLAST_PROGRAM",
             "value": {
                 "default": "blastn",
                 "type": "enumeration",
@@ -90,14 +90,14 @@
             },
             "details": {
                 "description": "",
-                "label": "BLAST_PROGRAM",
+                "label": "BLAST program",
                 "argument": "",
                 "repeatArgument": false,
                 "showArgument": true
             }
         },
         {
-            "id": "Percent Identity",
+            "id": "PERCENT_IDENTITY",
             "value": {
                 "default": "0.0",
                 "type": "string",
@@ -109,14 +109,14 @@
             },
             "details": {
                 "description": "",
-                "label": "PERCENT_IDENTITY",
+                "label": "Percent Identity",
                 "argument": "",
                 "repeatArgument": false,
                 "showArgument": true
             }
         },
         {
-            "id": "Percent query coverage per hsp",
+            "id": "QCOV_HSP_PERC",
             "value": {
                 "default": "0.0",
                 "type": "string",
@@ -128,7 +128,7 @@
             },
             "details": {
                 "description": "",
-                "label": "QCOV_HSP_PERC",
+                "label": "Percent query coverage per hsp",
                 "argument": "",
                 "repeatArgument": false,
                 "showArgument": true
