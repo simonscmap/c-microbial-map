@@ -9,7 +9,9 @@ clean:
 	rm -f $(IMG)
 
 img: clean
-	#sudo $(SINGULARITY) build $(IMG) $(DEF)
+	sudo $(SINGULARITY) build $(IMG) $(DEF)
+
+img_old: clean
 	sudo $(SINGULARITY) create --size 2048 $(IMG)
 	sudo $(SINGULARITY) bootstrap $(IMG) $(DEF)
 
