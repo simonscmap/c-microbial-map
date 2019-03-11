@@ -174,7 +174,7 @@ def cmap_query(blast_hits, centroids_db, out_dir):
     out_fh = open(out_file, 'wt')
     out_fh.write(','.join([
         'latitude', 'longitude', 'depth', 'Relative_Abundance', 'temperature',
-        'salinity', 'cruise_name'
+        'salinity', 'cruise_name', 'size_frac_lower', 'size_frac_upper'
     ]) + '\n')
 
     seen = set()
