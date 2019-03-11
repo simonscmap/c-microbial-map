@@ -5,8 +5,8 @@
 #SBATCH -t 02:00:00
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -J rocetest
+#SBATCH -J cmaptest
 
 set -u
 
-./run.sh "$WORK/data/r-oce/x00.input.csv"
+./run.sh -q "$WORK/data/scope/c-microbial-map/Prochlorococcus_example_query.fasta"

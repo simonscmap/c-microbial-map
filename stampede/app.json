@@ -46,17 +46,17 @@
                     "http://sswapmeet.sswap.info/mime/application/X-bam"
                 ],
                 "minCardinality": 1,
-                "maxCardinality": -1,
+                "maxCardinality": 1,
                 "fileTypes": [
                     "raw-0"
                 ]
             },
             "details": {
                 "description": "",
-                "label": "Input file",
-                "argument": "",
+                "label": "Input file(s)",
+                "argument": "--query ",
                 "repeatArgument": false,
-                "showArgument": false
+                "showArgument": true
             }
         }
     ],
@@ -91,7 +91,7 @@
             "details": {
                 "description": "",
                 "label": "BLAST program",
-                "argument": "",
+                "argument": "--blast_program ",
                 "repeatArgument": false,
                 "showArgument": true
             }
@@ -110,7 +110,7 @@
             "details": {
                 "description": "",
                 "label": "Percent Identity",
-                "argument": "",
+                "argument": "--perc_identity ",
                 "repeatArgument": false,
                 "showArgument": true
             }
@@ -129,7 +129,7 @@
             "details": {
                 "description": "",
                 "label": "Percent query coverage per hsp",
-                "argument": "",
+                "argument": "--qcov_hsp_perc ",
                 "repeatArgument": false,
                 "showArgument": true
             }
