@@ -164,7 +164,7 @@ def cmap_query(blast_hits, centroids_db, out_dir):
     # if the CMAP tblESV column is changed
     flds = [
         'lat', 'lon', 'depth', 'relative_abundance', 'esv_tempreature',
-        'esv_salinity', 'cruise_name'
+        'esv_salinity', 'cruise_name', 'size_frac_lower', 'size_frac_upper'
     ]
     qry = 'select {} from tblesv where centroid=?'.format(', '.join(flds))
     cursor = sqlite3.connect(
