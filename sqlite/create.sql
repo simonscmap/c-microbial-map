@@ -9,6 +9,8 @@ create table tblesv (
   esv_tempreature text default '',
   esv_salinity text default '',
   cruise_name text default '',
+  size_frac_lower real default 0.0,
+  size_frac_upper real default 0.0,
   id text default ''
 );
 
