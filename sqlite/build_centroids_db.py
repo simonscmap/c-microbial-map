@@ -6,6 +6,7 @@ Purpose: Build Centroids db
 """
 
 import argparse
+import gzip
 import os
 import sys
 import sqlite3
@@ -69,15 +70,15 @@ def import_centroid(sqlite_db, cmap_db, centroid_hash):
     cur = sqlite_db.cursor()
 
     # Remove all centroid data first
-    cur.execute('delete from centroid where centroid_hash=?',
+    cur.execute('delete from tblesv where centroid=?',
                 (centroid_hash, ))
 
     flds = [
         'lat', 'lon', 'depth', 'relative_abundance', 'esv_tempreature',
-        'esv_salinity', 'cruise_name'
+        'esv_salinity', 'cruise_name', 'size_frac_lower', 'size_frac_upper'
     ]
 
-    insert = 'insert into centroid (centroid_hash, {}) values (?, {})'.format(
+    insert = 'insert into tblesv (centroid, {}) values (?, {})'.format(
         ', '.join(flds), ', '.join(['?' for f in flds]))
 
     num_imported = 0
@@ -125,7 +126,10 @@ def main():
     sqlite_db = sqlite_connect(db_name, cwd)
     total_imported = 0
 
-    for i, rec in enumerate(SeqIO.parse(fasta, 'fasta'), start=1):
+    _, ext = os.path.splitext(os.path.basename(fasta))
+    fh = gzip.open(fasta, 'rt') if ext == '.gz' else open(fasta)
+
+    for i, rec in enumerate(SeqIO.parse(fh, 'fasta'), start=1):
         centroid_hash = rec.id
         num_imported = import_centroid(sqlite_db, db, centroid_hash)
         print('{:6}: {} ({})'.format(i, centroid_hash, num_imported))
