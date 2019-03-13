@@ -159,6 +159,7 @@ def plot(frac_files, out_dir):
 
     return 1
 
+
 # --------------------------------------------------
 def cmap_query(blast_hits, centroids_db, out_dir):
     """Given BLAST hits, query CMAP/SQLite for location"""
@@ -221,10 +222,13 @@ def cmap_query(blast_hits, centroids_db, out_dir):
 
     frac_files = []
     df = pd.read_csv(out_file)
-    for frac in df['size_frac_lower'].unique():
-        frac_out = os.path.join(out_dir, 'frac-{}.csv'.format(frac))
-        df[df['size_frac_lower'] == frac].to_csv(frac_out)
-        frac_files.append(frac_out)
+    for cruise_name in df['cruise_name'].unique():
+        for frac in df['size_frac_lower'].unique():
+            frac_out = os.path.join(out_dir, '{}_frac-{}.csv'.format(
+                cruise_name, frac))
+            df[(df['cruise_name'] == cruise_name)
+               & (df['size_frac_lower'] == frac)].to_csv(frac_out)
+            frac_files.append(frac_out)
 
     return frac_files
 
