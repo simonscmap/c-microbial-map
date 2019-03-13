@@ -128,33 +128,36 @@ def main():
         out_dir=out_dir)
 
     print('Centroids query')
-    centroids_file = cmap_query(
+    frac_files = cmap_query(
         blast_hits=hits, centroids_db=centroids_db, out_dir=out_dir)
 
     print('Plotting')
-    plot(centroids_file=centroids_file, out_dir=out_dir)
+    plot(frac_files=frac_files, out_dir=out_dir)
 
     print('Done')
 
 
 # --------------------------------------------------
-def plot(centroids_file, out_dir):
+def plot(frac_files, out_dir):
     """Given CMAP location data, plot distribution"""
 
     cwd = os.path.abspath(os.path.dirname(sys.argv[0]))
-    plot = os.path.join(cwd, 'plot.r')
+    plot_r = os.path.join(cwd, 'plot.r')
 
-    if os.path.isfile(plot):
-        rv, out = getstatusoutput('{} {}'.format(plot, centroids_file))
-        print(out)
+    if not os.path.isfile(plot_r):
+        die('Missing "{}"'.format(plot_r))
 
-        if rv == 0:
-            return 1
-        else:
+    for file in frac_files:
+        print('Plotting fraction "{}"'.format(file))
+        base, _ = os.path.splitext(os.path.basename(file))
+        frac_dir = os.path.join(out_dir, base)
+        rv, out = getstatusoutput('{} -f {} -o {}'.format(
+            plot_r, file, frac_dir))
+
+        if rv != 0:
             die('Error plotting ({}):\n{}\n'.format(rv, out))
-    else:
-        die('Cannot find "{}"'.format(plot))
 
+    return 1
 
 # --------------------------------------------------
 def cmap_query(blast_hits, centroids_db, out_dir):
@@ -163,8 +166,14 @@ def cmap_query(blast_hits, centroids_db, out_dir):
     # TODO: fix spelling of "esv_tempreature" => "esv_temperature"
     # if the CMAP tblESV column is changed
     flds = [
-        'lat', 'lon', 'depth', 'relative_abundance', 'esv_tempreature',
-        'esv_salinity', 'cruise_name', 'size_frac_lower', 'size_frac_upper'
+        'lat',
+        'lon',
+        'depth',
+        'relative_abundance',
+        'esv_tempreature',
+        'esv_salinity',
+        'cruise_name',
+        'size_frac_lower'  #, 'size_frac_upper'
     ]
     qry = 'select {} from tblesv where centroid=?'.format(', '.join(flds))
     cursor = sqlite3.connect(
@@ -173,8 +182,14 @@ def cmap_query(blast_hits, centroids_db, out_dir):
     out_file = os.path.join(out_dir, 'oce-input.csv')
     out_fh = open(out_file, 'wt')
     out_fh.write(','.join([
-        'latitude', 'longitude', 'depth', 'Relative_Abundance', 'temperature',
-        'salinity', 'cruise_name', 'size_frac_lower', 'size_frac_upper'
+        'latitude',
+        'longitude',
+        'depth',
+        'Relative_Abundance',
+        'temperature',
+        'salinity',
+        'cruise_name',
+        'size_frac_lower'  #, 'size_frac_upper'
     ]) + '\n')
 
     seen = set()
@@ -203,7 +218,15 @@ def cmap_query(blast_hits, centroids_db, out_dir):
                 warn('Found no match for centroid "{}"'.format(seq_id))
 
     out_fh.close()
-    return out_file
+
+    frac_files = []
+    df = pd.read_csv(out_file)
+    for frac in df['size_frac_lower'].unique():
+        frac_out = os.path.join(out_dir, 'frac-{}.csv'.format(frac))
+        df[df['size_frac_lower'] == frac].to_csv(frac_out)
+        frac_files.append(frac_out)
+
+    return frac_files
 
 
 # --------------------------------------------------
