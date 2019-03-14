@@ -53,12 +53,11 @@ main = function() {
   img_width  = opts$width
   img_height = opts$height
   
-  out_dir = normalizePath(out_dir)
-  
   if (!dir.exists(out_dir)) {
-    printf("Creating outdir '%s'\n", out_dir)
     dir.create(out_dir)
   }
+
+  out_dir = normalizePath(out_dir)
 
   d <- read.csv(file_name)
   
@@ -208,7 +207,7 @@ main = function() {
   
   invisible(dev.off())
   
-  print('Done.')
+  printf("Done, see outdir '%s'\n", out_dir)
 }
 
 main()
