@@ -8,9 +8,12 @@ Purpose: BLAST hits to CMAP visualization
 import argparse
 import csv
 import os
-import sys
-import pandas as pd
+import shutil
 import sqlite3
+import subprocess
+import sys
+import tempfile
+import pandas as pd
 from opedia import db
 from subprocess import getstatusoutput
 
@@ -129,9 +132,11 @@ def main():
 
     print('Centroids query')
     frac_files = cmap_query(
-        blast_hits=hits, centroids_db=centroids_db, out_dir=out_dir)
+        blast_hits=hits,
+        centroids_db=centroids_db,
+        out_dir=out_dir,
+        perc_identity=args.perc_identity)
 
-    print('Plotting')
     plot(frac_files=frac_files, out_dir=out_dir)
 
     print('Done')
@@ -147,51 +152,48 @@ def plot(frac_files, out_dir):
     if not os.path.isfile(plot_r):
         die('Missing "{}"'.format(plot_r))
 
+    jobfile = tempfile.NamedTemporaryFile(delete=False, mode='wt')
     for file in frac_files:
-        print('Plotting fraction "{}"'.format(file))
         base, _ = os.path.splitext(os.path.basename(file))
         frac_dir = os.path.join(out_dir, base)
-        rv, out = getstatusoutput('{} -f {} -o {}'.format(
-            plot_r, file, frac_dir))
+        jobfile.write('{} -f {} -o {}\n'.format(plot_r, file, frac_dir))
 
-        if rv != 0:
-            die('Error plotting ({}):\n{}\n'.format(rv, out))
+    jobfile.close()
+
+    run_job_file(jobfile=jobfile.name, msg='Plotting', procs=8)
 
     return 1
 
 
 # --------------------------------------------------
-def cmap_query(blast_hits, centroids_db, out_dir):
+def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
     """Given BLAST hits, query CMAP/SQLite for location"""
 
     # TODO: fix spelling of "esv_tempreature" => "esv_temperature"
     # if the CMAP tblESV column is changed
-    flds = [
-        'lat',
-        'lon',
-        'depth',
-        'relative_abundance',
-        'esv_tempreature',
-        'esv_salinity',
-        'cruise_name',
-        'size_frac_lower'  #, 'size_frac_upper'
+    qry_flds = [
+        'centroid', 'lat', 'lon', 'depth', 'relative_abundance',
+        'esv_tempreature', 'esv_salinity', 'cruise_name', 'size_frac_lower',
+        'size_frac_upper'
     ]
-    qry = 'select {} from tblesv where centroid=?'.format(', '.join(flds))
+    qry = 'select {} from tblesv where centroid=?'.format(', '.join(qry_flds))
     cursor = sqlite3.connect(
         centroids_db).cursor() if centroids_db else db.dbConnect().cursor()
 
-    out_file = os.path.join(out_dir, 'oce-input.csv')
+    out_flds = [
+        'centroid', 'latitude', 'longitude', 'depth', 'Relative_Abundance',
+        'temperature', 'salinity', 'cruise_name', 'size_frac_lower',
+        'size_frac_upper'
+    ]
+
+    data_dir = os.path.join(out_dir, 'data')
+
+    if not os.path.isdir(data_dir):
+        os.makedirs(data_dir)
+
+    out_file = os.path.join(data_dir, 'oce-input.csv')
     out_fh = open(out_file, 'wt')
-    out_fh.write(','.join([
-        'latitude',
-        'longitude',
-        'depth',
-        'Relative_Abundance',
-        'temperature',
-        'salinity',
-        'cruise_name',
-        'size_frac_lower'  #, 'size_frac_upper'
-    ]) + '\n')
+    out_fh.write(','.join(out_flds) + '\n')
 
     seen = set()
     with open(blast_hits) as csvfile:
@@ -213,6 +215,10 @@ def cmap_query(blast_hits, centroids_db, out_dir):
 
             if rows:
                 for row in rows:
+                    # set size_frac_upper = size_frac_lower if missing
+                    upper = row[-1]
+                    if not isinstance(upper, (int, float)):
+                        row = (*row[:-1], row[-2])
                     out_fh.write(','.join(map(lambda x: str(x).strip(), row)) +
                                  '\n')
             else:
@@ -222,15 +228,36 @@ def cmap_query(blast_hits, centroids_db, out_dir):
 
     frac_files = []
     df = pd.read_csv(out_file)
-    for cruise_name in df['cruise_name'].unique():
-        for frac in df['size_frac_lower'].unique():
-            frac_out = os.path.join(out_dir, '{}_frac-{}.csv'.format(
-                cruise_name, frac))
-            df[(df['cruise_name'] == cruise_name)
-               & (df['size_frac_lower'] == frac)].to_csv(frac_out)
-            frac_files.append(frac_out)
+    df['size'] = df['size_frac_lower'].astype(
+        str) + '-' + df['size_frac_upper'].astype(str)
+
+    for centroid in df['centroid'].unique():
+        for cruise_name in df['cruise_name'].unique():
+            for frac in df['size'].unique():
+                frac_out = os.path.join(
+                    data_dir,
+                    'asv_{}__cruise_{}__pident_{}__frac_{}.csv'.format(
+                        centroid, cruise_name, perc_identity, frac))
+                frac_df = df[(df['centroid'] == centroid)
+                             & (df['cruise_name'] == cruise_name) &
+                             (df['size'] == frac)]
+
+                if not frac_df.empty:
+                    frac_df.to_csv(frac_out)
+                    frac_files.append(frac_out)
 
     return frac_files
+
+
+# --------------------------------------------------
+def line_count(fname):
+    """Count the number of lines in a file"""
+
+    n = 0
+    for _ in open(fname):
+        n += 1
+
+    return n
 
 
 # --------------------------------------------------
@@ -259,6 +286,33 @@ def run_blast(blast_db, blast_prg, query, perc_identity, qcov_hsp_perc,
                 die('No hits from BLAST')
     else:
         die('Failed to run BLAST ({}):\n{}'.format(rv, blast_out))
+
+
+# --------------------------------------------------
+def run_job_file(jobfile, msg='Running job', procs=1):
+    """Run a job file if there are jobs"""
+
+    num_jobs = line_count(jobfile)
+    warn('{} (# jobs = {})'.format(msg, num_jobs))
+
+    if num_jobs > 0:
+        try:
+            if shutil.which('parallel'):
+                try:
+                    cmd = 'parallel --halt soon,fail=1 -P {} < {}'.format(
+                        procs, jobfile)
+                    subprocess.run(cmd, shell=True, check=True)
+                except subprocess.CalledProcessError as err:
+                    die('Error:\n{}\n{}\n'.format(err.stderr, err.stdout))
+            else:
+                for cmd in open(jobfile):
+                    subprocess.run(cmd, shell=True, check=True)
+        except Exception as e:
+            die('Error: {}'.format(e))
+        finally:
+            os.remove(jobfile)
+
+    return True
 
 
 # --------------------------------------------------
