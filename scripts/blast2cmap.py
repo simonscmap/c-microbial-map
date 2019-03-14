@@ -81,6 +81,14 @@ def get_args():
         type=str,
         default='out')
 
+    parser.add_argument(
+        '-n',
+        '--num_cpus',
+        help='Num CPUs for parallel',
+        metavar='int',
+        type=int,
+        default=8)
+
     return parser.parse_args()
 
 
@@ -137,13 +145,13 @@ def main():
         out_dir=out_dir,
         perc_identity=args.perc_identity)
 
-    plot(frac_files=frac_files, out_dir=out_dir)
+    plot(frac_files=frac_files, out_dir=out_dir, num_procs=args.num_cpus)
 
     print('Done')
 
 
 # --------------------------------------------------
-def plot(frac_files, out_dir):
+def plot(frac_files, out_dir, num_procs):
     """Given CMAP location data, plot distribution"""
 
     cwd = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -160,7 +168,7 @@ def plot(frac_files, out_dir):
 
     jobfile.close()
 
-    run_job_file(jobfile=jobfile.name, msg='Plotting', procs=8)
+    run_job_file(jobfile=jobfile.name, msg='Plotting', num_procs=num_procs)
 
     return 1
 
@@ -289,18 +297,18 @@ def run_blast(blast_db, blast_prg, query, perc_identity, qcov_hsp_perc,
 
 
 # --------------------------------------------------
-def run_job_file(jobfile, msg='Running job', procs=1):
+def run_job_file(jobfile, msg='Running job', num_procs=1):
     """Run a job file if there are jobs"""
 
     num_jobs = line_count(jobfile)
-    warn('{} (# jobs = {})'.format(msg, num_jobs))
+    warn('{} (# jobs = {} # cpus = {})'.format(msg, num_jobs, num_procs))
 
     if num_jobs > 0:
         try:
             if shutil.which('parallel'):
                 try:
                     cmd = 'parallel --halt soon,fail=1 -P {} < {}'.format(
-                        procs, jobfile)
+                        num_procs, jobfile)
                     subprocess.run(cmd, shell=True, check=True)
                 except subprocess.CalledProcessError as err:
                     die('Error:\n{}\n{}\n'.format(err.stderr, err.stdout))
