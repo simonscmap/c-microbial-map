@@ -55,6 +55,7 @@ def get_args():
         help='BLAST program',
         metavar='str',
         type=str,
+        choices=['blastn', 'tblastn'],
         default='blastn')
 
     parser.add_argument(
@@ -63,7 +64,7 @@ def get_args():
         help='BLAST percent identity',
         metavar='float',
         type=float,
-        default=0.)
+        default=97.)
 
     parser.add_argument(
         '-Q',
@@ -191,7 +192,7 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
     out_flds = [
         'centroid', 'latitude', 'longitude', 'depth', 'Relative_Abundance',
         'temperature', 'salinity', 'cruise_name', 'size_frac_lower',
-        'size_frac_upper'
+        'size_frac_upper', 'pident'
     ]
 
     data_dir = os.path.join(out_dir, 'data')
@@ -210,9 +211,10 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
             'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore'
         ]
         reader = csv.DictReader(csvfile, fieldnames=blast_flds, delimiter='\t')
+        write_flds = qry_flds + ['pident']
 
-        for hit_num, row in enumerate(reader):
-            seq_id = row['sseqid']
+        for hit_num, blast_hit in enumerate(reader):
+            seq_id = blast_hit['sseqid']
             print('{:5}: {}'.format(hit_num + 1, seq_id))
 
             if seq_id in seen:
@@ -223,12 +225,15 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
 
             if rows:
                 for row in rows:
-                    # set size_frac_upper = size_frac_lower if missing
-                    upper = row[-1]
+                    d = dict(zip(qry_flds, row))
+                    d['pident'] = blast_hit['pident']
+
+                    upper = d['size_frac_upper']
                     if not isinstance(upper, (int, float)):
-                        row = (*row[:-1], row[-2])
-                    out_fh.write(','.join(map(lambda x: str(x).strip(), row)) +
-                                 '\n')
+                        d['size_frac_upper'] = d['size_frac_lower']
+
+                    out_fh.write(','.join(
+                        map(lambda x: str(d[x]).strip(), write_flds)) + '\n')
             else:
                 warn('Found no match for centroid "{}"'.format(seq_id))
 
@@ -242,15 +247,16 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
     for centroid in df['centroid'].unique():
         for cruise_name in df['cruise_name'].unique():
             for frac in df['size'].unique():
-                frac_out = os.path.join(
-                    data_dir,
-                    'asv_{}__cruise_{}__pident_{}__frac_{}.csv'.format(
-                        centroid, cruise_name, perc_identity, frac))
                 frac_df = df[(df['centroid'] == centroid)
                              & (df['cruise_name'] == cruise_name) &
                              (df['size'] == frac)]
 
                 if not frac_df.empty:
+                    pident = frac_df['pident'].unique()[0]
+                    frac_out = os.path.join(
+                        data_dir,
+                        'asv_{}__cruise_{}__pident_{:.04f}__frac_{}.csv'.
+                        format(centroid, cruise_name, pident, frac))
                     frac_df.to_csv(frac_out)
                     frac_files.append(frac_out)
 
