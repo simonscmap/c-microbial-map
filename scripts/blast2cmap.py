@@ -72,7 +72,7 @@ def get_args():
         help='BLAST percent query coverage per hsp',
         metavar='float',
         type=float,
-        default=0.)
+        default=100.)
 
     parser.add_argument(
         '-o',
