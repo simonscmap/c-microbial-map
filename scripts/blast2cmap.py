@@ -162,10 +162,22 @@ def plot(frac_files, out_dir, num_procs):
         die('Missing "{}"'.format(plot_r))
 
     jobfile = tempfile.NamedTemporaryFile(delete=False, mode='wt')
+    job_tmpl = "{prg} -f {file} -o {out_dir} -t '{title}' -l '{legend}'\n"
     for file in frac_files:
         base, _ = os.path.splitext(os.path.basename(file))
         frac_dir = os.path.join(out_dir, base)
-        jobfile.write('{} -f {} -o {}\n'.format(plot_r, file, frac_dir))
+        d = dict(map(lambda s: s.split('_', maxsplit=1), base.split('__')))
+        title = 'ASV* Distribution Across "{}" Cruise ({} size fraction)'.format(
+            d['cruise'], d['frac'])
+        legend = '*Hit ID="{}" {}% similar to query "{}"'.format(
+            d['asv'], d['pident'], d['qseqid'])
+        jobfile.write(
+            job_tmpl.format(
+                prg=plot_r,
+                file=file,
+                out_dir=frac_dir,
+                title=title,
+                legend=legend))
 
     jobfile.close()
 
@@ -190,9 +202,9 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
         centroids_db).cursor() if centroids_db else db.dbConnect().cursor()
 
     out_flds = [
-        'centroid', 'latitude', 'longitude', 'depth', 'Relative_Abundance',
+        'centroid', 'latitude', 'longitude', 'depth', 'relative_abundance',
         'temperature', 'salinity', 'cruise_name', 'size_frac_lower',
-        'size_frac_upper', 'pident'
+        'size_frac_upper', 'pident', 'qseqid'
     ]
 
     data_dir = os.path.join(out_dir, 'data')
@@ -211,7 +223,7 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
             'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore'
         ]
         reader = csv.DictReader(csvfile, fieldnames=blast_flds, delimiter='\t')
-        write_flds = qry_flds + ['pident']
+        write_flds = qry_flds + ['pident', 'qseqid']
 
         for hit_num, blast_hit in enumerate(reader):
             seq_id = blast_hit['sseqid']
@@ -227,6 +239,7 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
                 for row in rows:
                     d = dict(zip(qry_flds, row))
                     d['pident'] = blast_hit['pident']
+                    d['qseqid'] = blast_hit['qseqid']
 
                     upper = d['size_frac_upper']
                     if not isinstance(upper, (int, float)):
@@ -253,11 +266,15 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
 
                 if not frac_df.empty:
                     pident = frac_df['pident'].unique()[0]
+                    qseqid = frac_df['qseqid'].unique()[0]
+                    t = '__'.join([
+                        'asv_{}', 'cruise_{}', 'qseqid_{}', 'pident_{:.04f}',
+                        'frac_{}'
+                    ]) + '.csv'
                     frac_out = os.path.join(
                         data_dir,
-                        'asv_{}__cruise_{}__pident_{:.04f}__frac_{}.csv'.
-                        format(centroid, cruise_name, pident, frac))
-                    frac_df.to_csv(frac_out)
+                        t.format(centroid, cruise_name, qseqid, pident, frac))
+                    frac_df.to_csv(frac_out, index=False)
                     frac_files.append(frac_out)
 
     return frac_files

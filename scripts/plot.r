@@ -27,6 +27,20 @@ getArgs = function() {
       metavar = "character"
     ),
     make_option(
+      c("-t", "--title"),
+      default = "",
+      type = "character",
+      help = "Title",
+      metavar = "character"
+    ),
+    make_option(
+      c("-l", "--legend"),
+      default = "",
+      type = "character",
+      help = "Legend",
+      metavar = "character"
+    ),
+    make_option(
       c("-w", "--width"),
       default = 7,
       type = "integer",
@@ -52,6 +66,8 @@ main = function() {
   out_dir    = opts$outdir
   img_width  = opts$width
   img_height = opts$height
+  plot_title = opts$title
+  plot_legend = opts$legend
   
   if (!dir.exists(out_dir)) {
     dir.create(out_dir)
@@ -77,7 +93,7 @@ main = function() {
       )
     ctd <- oceSetData(ctd, 'depth', x$depth[o])
     ctd <-
-      oceSetData(ctd, 'eASV_Relative_Abundance', x$Relative_Abundance[o])
+      oceSetData(ctd, 'eASV_Relative_Abundance', x$relative_abundance[o])
   })
   
   sec <- as.section(stns) #Create a section from the CTD data
@@ -103,7 +119,8 @@ main = function() {
   #plot(sec, showstations=TRUE, ztype="contour", showBottom=FALSE)
   
   ###Dot plot with interpolated temperature up top, only colour proportional to the abundance
-  par(mfrow = c(2, 1))
+  par(mfrow = c(2, 1), xpd=NA)
+
   plot(
     sg,
     which = 'temperature',
@@ -115,6 +132,11 @@ main = function() {
     cex = 2,
     pch = 16
   )
+
+  if (length(plot_title) > 0) {
+    title(main = plot_title)
+  }
+  
   cm <- colormap(abun, col = oceColorsViridis)
   #drawPalette(colormap=cm)
   plot(
@@ -129,6 +151,10 @@ main = function() {
     cex = 2,
     pch = 16
   )
+
+  # if (length(plot_legend) > 0) {
+  #   legend('bottom', plot_legend, xpd=TRUE)
+  # }
   
   #Change up the sizes
   #cex <- max(log10(abun))/log10(abun) #Normalized sizes
@@ -145,6 +171,7 @@ main = function() {
     mar = c(3.5, 3.5, 2, 4),
     cex = 3 * cex
   )
+
   
   ###Dot plot with interpolated temperature up top, color and the size proportional to the abundance
   par(mfrow = c(2, 1))
