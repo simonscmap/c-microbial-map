@@ -1,4 +1,4 @@
-# Simon C-Microbial-MAP
+# Simons Foundation C-Microbial-MAP
 
 This app seek to answer the question:
 
@@ -108,3 +108,6 @@ $ jobs-output-get -r <job-id>
 * Jesse McNichol <mcnichol@alum.mit.edu>
 * Mohammad Ashkezari <mdehghan@uw.edu> 
 * Ken Youens-Clark <kyclark@email.arizona.edu>
+
+Kudos to:
+* Clark Richards (Bedford Institute of Oceanography, Halifax, NS, Canada) for invaluable help and discussions about how to use the R "oce" package.
