@@ -167,9 +167,9 @@ def plot(frac_files, out_dir, num_procs):
         base, _ = os.path.splitext(os.path.basename(file))
         frac_dir = os.path.join(out_dir, base)
         d = dict(map(lambda s: s.split('_', maxsplit=1), base.split('__')))
-        title = 'ASV* Distribution Across "{}" Cruise ({} size fraction)'.format(
+        title = 'eASV* Abundance For Cruise "{}" ({} μM size frac.)'.format(
             d['cruise'], d['frac'])
-        legend = '*Hit ID="{}" {}% similar to query "{}"'.format(
+        legend = '*eASV ID="{}" is {}% similar to query "{}"'.format(
             d['asv'], d['pident'], d['qseqid'])
         jobfile.write(
             job_tmpl.format(

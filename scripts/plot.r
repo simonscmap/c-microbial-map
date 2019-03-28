@@ -10,7 +10,7 @@ suppressMessages(library("R.utils"))
 # -----------------------------------------------------------
 getArgs = function() {
   args = commandArgs(trailingOnly = TRUE)
-  
+
   option_list = list(
     make_option(
       c("-f", "--file"),
@@ -68,7 +68,7 @@ main = function() {
   img_height = opts$height
   plot_title = opts$title
   plot_legend = opts$legend
-  
+
   if (!dir.exists(out_dir)) {
     dir.create(out_dir)
   }
@@ -76,10 +76,10 @@ main = function() {
   out_dir = normalizePath(out_dir)
 
   d <- read.csv(file_name)
-  
+
   tmp <- split(d, d$latitude)
   names(tmp) <- paste0('stn', seq_along(tmp))
-  
+
   #Import the stations as a CTD object
   stns <- lapply(tmp, function(x) {
     o <- order(x$depth) # the depths are not always in order
@@ -95,31 +95,32 @@ main = function() {
     ctd <-
       oceSetData(ctd, 'eASV_Relative_Abundance', x$relative_abundance[o])
   })
-  
+
   sec <- as.section(stns) #Create a section from the CTD data
+  maxDepth <- max(sec[['depth']])
+  rescaledDepth <- maxDepth * 1.25
+
   sg <-
     sectionGrid(sec, p = seq(20, 200, 5)) #For better interpolation (though be cautious with these plots!)
-  
+
   base = tools::file_path_sans_ext(basename(file_name))
   outname <-
     file.path(out_dir, paste0(base, '-eASV-plot-%02d.png'))
-  
+
   invisible(png(
     outname,
     width = img_width,
     height = img_height,
-    res = 300,
+    res = 600,
     units = 'in'
   ))
-  
+
   abun <-
     unlist(lapply(stns, function(x)
       x[['eASV_Relative_Abundance']]))
-  
-  #plot(sec, showstations=TRUE, ztype="contour", showBottom=FALSE)
-  
+
   ###Dot plot with interpolated temperature up top, only colour proportional to the abundance
-  par(mfrow = c(2, 1), xpd=NA)
+  par(mfrow = c(3, 1), oma=c(2,2,2,2))
 
   plot(
     sg,
@@ -134,9 +135,9 @@ main = function() {
   )
 
   if (length(plot_title) > 0) {
-    title(main = plot_title)
+    mtext(plot_title, 3, line=0, outer=TRUE, cex=1.2)
   }
-  
+
   cm <- colormap(abun, col = oceColorsViridis)
   #drawPalette(colormap=cm)
   plot(
@@ -149,17 +150,25 @@ main = function() {
     ztype = 'points',
     zcol = oceColorsViridis,
     cex = 2,
-    pch = 16
+    pch = 16,
+    ylim = c(rescaledDepth,0)
   )
 
-  # if (length(plot_legend) > 0) {
-  #   legend('bottom', plot_legend, xpd=TRUE)
-  # }
-  
+  if (length(plot_legend) > 0) {
+    mtext(plot_legend, 1, line=1, outer=TRUE, cex=0.8)
+  }
+
+  plot(
+    sec,
+    which = 99,
+    showstations=TRUE,
+    showStart=TRUE
+  )
+
+
   #Change up the sizes
-  #cex <- max(log10(abun))/log10(abun) #Normalized sizes
   cex <- abun / max(abun) #Normalized sizes
-  
+
   ###T-S diagram
   par(mfrow = c(1, 1))
   cm <- colormap(abun, col = oceColorsViridis)
@@ -172,14 +181,21 @@ main = function() {
     cex = 3 * cex
   )
 
-  
+  if (length(plot_title) > 0) {
+    mtext(plot_title, 3, line=0, outer=TRUE, cex=1.2)
+  }
+
+  if (length(plot_legend) > 0) {
+    mtext(plot_legend, 1, line=1, outer=TRUE, cex=0.8)
+  }
+
   ###Dot plot with interpolated temperature up top, color and the size proportional to the abundance
-  par(mfrow = c(2, 1))
-  
+  par(mfrow = c(3, 1))
+
   plot(
     sg,
     which = 'temperature',
-    xtype = "latitude",
+    xtype = "distance",
     showstations = TRUE,
     showBottom = FALSE,
     ztype = 'image',
@@ -187,26 +203,42 @@ main = function() {
     cex = 2,
     pch = 16
   )
-  
+
+  if (length(plot_title) > 0) {
+    mtext(plot_title, 3, line=0, outer=TRUE, cex=1.2)
+  }
+
   plot(
     sec,
     which = 'eASV_Relative_Abundance',
     showBottom = FALSE,
     ztype = 'points',
     zcol = oceColorsViridis,
-    cex = 0
+    cex = 0,
+    ylim = c(rescaledDepth,0)
   )
-  
+
   # setup the plot
   points(sec[['distance']],
          sec[['pressure']],
          pch = 19,
          cex = 3 * cex,
          col = cm$zcol)
-  
+
+   plot(
+     sec,
+     which = 99,
+     showstations=TRUE,
+     showStart=TRUE
+   )
+
+   if (length(plot_legend) > 0) {
+     mtext(plot_legend, 1, line=1, outer=TRUE, cex=0.8)
+   }
+
   ###All interpolated (sketchy!)
-  par(mfrow = c(2, 1))
-  
+  par(mfrow = c(3, 1))
+
   plot(
     sg,
     which = 'temperature',
@@ -218,7 +250,11 @@ main = function() {
     cex = 2,
     pch = 16
   )
-  
+
+  if (length(plot_title) > 0) {
+    mtext(plot_title, 3, line=0, outer=TRUE, cex=1.2)
+  }
+
   plot(
     sg,
     which = 'eASV_Relative_Abundance',
@@ -231,9 +267,20 @@ main = function() {
     cex = 2,
     pch = 16
   )
-  
+
+  plot(
+    sec,
+    which = 99,
+    showstations=TRUE,
+    showStart=TRUE
+  )
+
+  if (length(plot_legend) > 0) {
+    mtext(plot_legend, 1, line=1, outer=TRUE, cex=0.8)
+  }
+
   invisible(dev.off())
-  
+
   printf("Done, see outdir '%s'\n", out_dir)
 }
 
