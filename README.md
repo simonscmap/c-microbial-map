@@ -110,4 +110,4 @@ $ jobs-output-get -r <job-id>
 * Ken Youens-Clark <kyclark@email.arizona.edu>
 
 Kudos to:
-* Clark Richards (Bedford Institute of Oceanography, Halifax, NS, Canada) for invaluable help and discussions about how to use the R "oce" package.
+* Clark Richards (Bedford Institute of Oceanography, Halifax, NS, Canada) for providing initial code for plotting ASVs with the R "oce" package and for patient help and discussions about how to use it!
