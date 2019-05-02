@@ -2,6 +2,9 @@
 *.csv
 *.swp
 .snakemake
+Snakefile
 .Rhistory
 centroids.db
 out
+*.fa
+*.fasta

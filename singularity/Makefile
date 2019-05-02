@@ -1,5 +1,5 @@
 SINGULARITY = /usr/local/bin/singularity
-IMG = c-microbial-map-0.0.1.img
+IMG = c-microbial-map-0.0.2.img
 DEF = image.def
 
 run:
