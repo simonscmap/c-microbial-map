@@ -1,6 +1,6 @@
 {
     "name": "c-microbial-map",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "shortDescription": "Given a FASTA file of 16S sequences, BLAST and map geographic distribution of hits.",
     "longDescription": "",
     "available": true,
@@ -10,7 +10,7 @@
     "defaultMaxRunTime": "12:00:00",
     "defaultNodeCount": 1,
     "defaultQueue": "normal",
-    "deploymentPath": "kyclark/applications/c-microbial-map-0.0.1/stampede",
+    "deploymentPath": "kyclark/applications/c-microbial-map-0.0.2/stampede",
     "deploymentSystem": "data.iplantcollaborative.org",
     "executionSystem": "tacc-stampede2-kyclark",
     "executionType": "HPC",
