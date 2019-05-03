@@ -1,6 +1,6 @@
 {
     "name": "c-microbial-map",
-    "version": "0.0.2",
+    "version": "0.2.0",
     "shortDescription": "Given a FASTA file of 16S sequences, BLAST and map geographic distribution of hits.",
     "longDescription": "",
     "available": true,
@@ -111,25 +111,6 @@
                 "description": "",
                 "label": "Percent Identity",
                 "argument": "--perc_identity ",
-                "repeatArgument": false,
-                "showArgument": true
-            }
-        },
-        {
-            "id": "QCOV_HSP_PERC",
-            "value": {
-                "default": "0.0",
-                "type": "string",
-                "order": 3,
-                "required": true,
-                "visible": true,
-                "enquote": false,
-                "validator": ""
-            },
-            "details": {
-                "description": "",
-                "label": "Percent query coverage per hsp",
-                "argument": "--qcov_hsp_perc ",
                 "repeatArgument": false,
                 "showArgument": true
             }
