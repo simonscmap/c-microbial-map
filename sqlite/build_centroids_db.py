@@ -74,7 +74,7 @@ def import_centroid(sqlite_db, cmap_db, centroid_hash):
                 (centroid_hash, ))
 
     flds = [
-        'lat', 'lon', 'depth', 'relative_abundance', 'esv_tempreature',
+        'lat', 'lon', 'depth', 'relative_abundance', 'esv_temperature',
         'esv_salinity', 'cruise_name', 'size_frac_lower', 'size_frac_upper'
     ]
 

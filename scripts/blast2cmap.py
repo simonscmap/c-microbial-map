@@ -67,14 +67,6 @@ def get_args():
         default=97.)
 
     parser.add_argument(
-        '-Q',
-        '--qcov_hsp_perc',
-        help='BLAST percent query coverage per hsp',
-        metavar='float',
-        type=float,
-        default=100.)
-
-    parser.add_argument(
         '-o',
         '--outdir',
         help='Output directory',
@@ -135,7 +127,6 @@ def main():
         blast_db=blast_db,
         blast_prg=blast_prg,
         perc_identity=args.perc_identity,
-        qcov_hsp_perc=args.qcov_hsp_perc,
         query=query,
         out_dir=out_dir)
 
@@ -190,11 +181,9 @@ def plot(frac_files, out_dir, num_procs):
 def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
     """Given BLAST hits, query CMAP/SQLite for location"""
 
-    # TODO: fix spelling of "esv_tempreature" => "esv_temperature"
-    # if the CMAP tblESV column is changed
     qry_flds = [
         'centroid', 'lat', 'lon', 'depth', 'relative_abundance',
-        'esv_tempreature', 'esv_salinity', 'cruise_name', 'size_frac_lower',
+        'esv_temperature', 'esv_salinity', 'cruise_name', 'size_frac_lower',
         'size_frac_upper'
     ]
     qry = 'select {} from tblesv where centroid=?'.format(', '.join(qry_flds))
@@ -268,7 +257,7 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
                     pident = frac_df['pident'].unique()[0]
                     qseqid = frac_df['qseqid'].unique()[0]
                     t = '__'.join([
-                        'asv_{}', 'cruise_{}', 'qseqid_{}', 'pident_{:.04f}',
+                        'asv_{}', 'cruise_{}', 'qseqid_{}', 'pident_{:.02f}',
                         'frac_{}'
                     ]) + '.csv'
                     frac_out = os.path.join(
@@ -292,8 +281,7 @@ def line_count(fname):
 
 
 # --------------------------------------------------
-def run_blast(blast_db, blast_prg, query, perc_identity, qcov_hsp_perc,
-              out_dir):
+def run_blast(blast_db, blast_prg, query, perc_identity, out_dir):
     """Given user query and params, run BLAST"""
 
     hits_file = os.path.join(out_dir, 'hits.tab')
@@ -303,9 +291,6 @@ def run_blast(blast_db, blast_prg, query, perc_identity, qcov_hsp_perc,
 
     if perc_identity > 0.:
         cmd += ' -perc_identity {}'.format(perc_identity)
-
-    if qcov_hsp_perc > 0.:
-        cmd += ' -qcov_hsp_perc {}'.format(qcov_hsp_perc)
 
     (rv, blast_out) = getstatusoutput(cmd)
 
