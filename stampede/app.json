@@ -99,7 +99,7 @@
         {
             "id": "PERCENT_IDENTITY",
             "value": {
-                "default": "0.0",
+                "default": "97.0",
                 "type": "string",
                 "order": 2,
                 "required": true,
@@ -118,7 +118,7 @@
         {
             "id": "QCOV_HSP_PERC",
             "value": {
-                "default": "0.0",
+                "default": "100.0",
                 "type": "string",
                 "order": 3,
                 "required": true,
