@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J r-oce
+#SBATCH -J cmap
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -p normal
@@ -9,7 +9,7 @@
 
 module load tacc-singularity
 
-IMG=/work/05066/imicrobe/singularity/c-microbial-map-0.0.1.img
+IMG=/work/05066/imicrobe/singularity/c-microbial-map-0.2.0.img
 CENTROIDS=/work/05066/imicrobe/iplantc.org/data/scope/centroids/centroids.db
 BLAST=/work/05066/imicrobe/iplantc.org/data/scope/blast/blast
 

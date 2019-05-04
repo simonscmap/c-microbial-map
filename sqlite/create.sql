@@ -6,7 +6,7 @@ create table tblesv (
   lon text default '',
   depth text default '', 
   relative_abundance text default '',
-  esv_tempreature text default '',
+  esv_temperature text default '',
   esv_salinity text default '',
   cruise_name text default '',
   size_frac_lower real default 0.0,
