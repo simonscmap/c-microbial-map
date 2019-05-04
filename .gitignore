@@ -9,3 +9,4 @@ out
 *.fa
 *.fasta
 cmap-out
+.DS_Store
