@@ -268,7 +268,7 @@ def cmap_query(blast_hits, centroids_db, out_dir, perc_identity):
                     pident = frac_df['pident'].unique()[0]
                     qseqid = frac_df['qseqid'].unique()[0]
                     t = '__'.join([
-                        'asv_{}', 'cruise_{}', 'qseqid_{}', 'pident_{:.04f}',
+                        'asv_{}', 'cruise_{}', 'qseqid_{}', 'pident_{:.02f}',
                         'frac_{}'
                     ]) + '.csv'
                     frac_out = os.path.join(
