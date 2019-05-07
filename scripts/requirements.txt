@@ -1,2 +1,2 @@
 pyodbc
-opedia
+opedia>=0.2.55
