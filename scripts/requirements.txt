@@ -1,0 +1,3 @@
+pyodbc
+opedia>=0.2.55
+colorama
