@@ -1,6 +1,6 @@
 {
-  "name":"c-microbial-map test-1552067195",
-  "appId": "c-microbial-map-0.0.1",
+  "name":"c-microbial-map-test",
+  "appId": "c-microbial-map-0.2.0",
   "batchQueue": "normal",
   "executionSystem": "tacc-stampede2-kyclark",
   "maxRunTime": "12:00:00",
@@ -15,8 +15,7 @@
   },
   "parameters": {
     "BLAST_PROGRAM": "blastn",
-    "PERCENT_IDENTITY": "0.20",
-    "QCOV_HSP_PERC": "0.30"
+    "PERCENT_IDENTITY": "0.99"
   },
   "notifications": [
     {
