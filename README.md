@@ -51,7 +51,7 @@ A Singularity image with all dependencies is available on Stampede2 in the share
 
 # Run Online
 
-If you have a CyVerse account, you can run the app on the Stampede2 cluster at TACC via iMicrobe (https://www.imicrobe.us/#/apps/83).
+If you have a CyVerse account, you can run the app on the Stampede2 cluster at TACC via iMicrobe (https://www.imicrobe.us/#/apps/92).
 
 # Run via CyVerse
 
