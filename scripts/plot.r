@@ -77,8 +77,10 @@ main = function() {
 
   d <- read.csv(file_name)
 
-  tmp <- split(d, d$latitude)
-  names(tmp) <- paste0('stn', seq_along(tmp))
+  aStations = seq_along(split(d, d$longitude)) #create array of length of unique longitude  values
+  keeporder <- factor(d$longitude, levels=unique(d$longitude))
+  tmp <- split(d, keeporder)
+  names(tmp) <- paste0('stn', aStations)
 
   #Import the stations as a CTD object
   stns <- lapply(tmp, function(x) {
@@ -96,7 +98,7 @@ main = function() {
       oceSetData(ctd, 'eASV_Relative_Abundance', x$relative_abundance[o])
   })
 
-  sec <- as.section(stns) #Create a section from the CTD data
+  sec <- lon360(as.section(stns)) #Create a section from the CTD data, transforming to 360 degree notation since GP13 crosses date line
   maxDepth <- max(sec[['depth']])
   rescaledDepth <- maxDepth * 1.25
 
@@ -125,7 +127,7 @@ main = function() {
   plot(
     sg,
     which = 'temperature',
-    xtype = "latitude",
+    xtype = "longitude",
     showstations = TRUE,
     showBottom = FALSE,
     ztype = 'image',
@@ -143,7 +145,7 @@ main = function() {
   plot(
     sec,
     which = 'eASV_Relative_Abundance',
-    xtype = "latitude",
+    xtype = "longitude",
     showstations = TRUE,
     grid = TRUE,
     showBottom = FALSE,
@@ -225,6 +227,14 @@ main = function() {
          cex = 3 * cex,
          col = cm$zcol)
 
+#  data(coastlineWorld)
+#  cl <- coastlineCut(coastlineWorld, -180)
+#  mapPlot(cl, col="lightgray",
+#        projection="+proj=lcc +lat_0=-30 +lon_0=165 +lat_1=-20 +lat_2=-40",
+#        longitudelim=c(150,200), latitudelim=c(-45,-10))
+#  mapPoints(sec, cex=0.5)
+
+
    plot(
      sec,
      which = 99,
@@ -242,7 +252,7 @@ main = function() {
   plot(
     sg,
     which = 'temperature',
-    xtype = "latitude",
+    xtype = "longitude",
     showstations = TRUE,
     showBottom = FALSE,
     ztype = 'image',
@@ -258,7 +268,7 @@ main = function() {
   plot(
     sg,
     which = 'eASV_Relative_Abundance',
-    xtype = "latitude",
+    xtype = "longitude",
     showstations = TRUE,
     grid = TRUE,
     showBottom = FALSE,
