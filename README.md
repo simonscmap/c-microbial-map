@@ -20,7 +20,7 @@ To run this code locally on your computer, you will need to install:
 * Microsoft ODBC drivers for you platform; for Mac, be sure to install http://www.freetds.org/
 * https://pypi.org/project/opedia/
 * BLAST+
-* R, Oce
+* R, Oce, latest github build may be necessary to accommodate dateline issue (https://github.com/dankelley/oce/issues/1614)
 
 From the "scripts" directory, you can run `blast2cmap.py`:
 
