@@ -105,9 +105,8 @@ main = function() {
   sg <-
     sectionGrid(sec, p = seq(20, 200, 5)) #For better interpolation (though be cautious with these plots!)
 
-  base = tools::file_path_sans_ext(basename(file_name))
   outname <-
-    file.path(out_dir, paste0(base, '-eASV-plot-%02d.png'))
+    file.path(out_dir, paste0(plot_legend, '-eASV-plot-%02d.png'))
 
   invisible(png(
     outname,
