@@ -4,7 +4,7 @@ This app seek to answer the question:
 
 > "Given a 16S/18S sequence for my organism of interest, what information can I retrieve on its geographic distribution from the CMAP database?"
 
-The input is a FASTA file of 16S sequences which are BLASTed to find hits which are then used to query the CMAP database using the Python "Opedia" to find the geographic information which is visualized using the R "Oce" module. The output of the application is set of PNG files.
+The input is a FASTA file of 16S sequences which are BLASTed to find hits which are then used to query the CMAP database using the Python "pycmap" and your API key to find the biogeographic information which is visualized using the R "Oce" module. The output of the application is set of PNG files.
 
 Cf.:
 
